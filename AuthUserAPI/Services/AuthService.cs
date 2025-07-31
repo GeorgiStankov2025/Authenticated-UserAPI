@@ -4,7 +4,9 @@ using AuthUserAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -54,9 +56,10 @@ namespace AuthUserAPI.Services
 
             var user= new User();
             var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
-
+            
             user.Username = request.Username;
             user.PasswordHash = hashedPassword;
+            user.Role = "User";
 
             context.Add(user);
 
@@ -77,7 +80,7 @@ namespace AuthUserAPI.Services
 
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")!));
+            var key = new SymmetricSecurityKey(Convert.FromBase64String(configuration.GetValue<string>("AppSettings:Token")));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
 
@@ -86,7 +89,7 @@ namespace AuthUserAPI.Services
                 issuer: configuration.GetValue<string>("AppSettings:Issuer"),
                 audience: configuration.GetValue<string>("AppSettings:Audience"),
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddMinutes(5),
                 signingCredentials: creds
 
             );
@@ -115,7 +118,7 @@ namespace AuthUserAPI.Services
 
             user.RefreshToken= refreshToken;
 
-            user.RefreshTokenExpiryTime= DateTime.UtcNow.AddDays(7);
+            user.RefreshTokenExpiryTime= DateTime.UtcNow.AddMinutes(10);
 
             await context.SaveChangesAsync();
 
