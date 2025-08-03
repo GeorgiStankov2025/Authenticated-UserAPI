@@ -18,7 +18,7 @@ namespace AuthUserAPI.Controllers
     public class AuthController(IAuthService authService) : ControllerBase
     {
 
-        
+
 
         [HttpPost("register")]
 
@@ -26,20 +26,20 @@ namespace AuthUserAPI.Controllers
         {
             var user = await authService.RegisterAsync(request);
 
-            if(user is null)
+            if (user is null)
             {
 
                 return BadRequest("Username already exists.");
 
             }
-            
+
             return Ok(user);
 
         }
 
         [HttpPost("login")]
 
-        public async Task<ActionResult<TokenResponseDTO>> Login (UserDTO request)
+        public async Task<ActionResult<TokenResponseDTO>> Login(UserDTO request)
         {
             var result = await authService.LoginAsync(request);
             if (result is null)
@@ -48,7 +48,7 @@ namespace AuthUserAPI.Controllers
                 return BadRequest("Invalid username or password.");
 
             }
-            
+
 
             return Ok(result);
 
@@ -62,7 +62,7 @@ namespace AuthUserAPI.Controllers
 
         }
 
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("admin-only")]
         public IActionResult AAdminOnlyEndPoint()
         {
@@ -76,8 +76,25 @@ namespace AuthUserAPI.Controllers
         public async Task<ActionResult<TokenResponseDTO>> RefreshToken(RefreshTokenRequestDTO request)
         {
 
-            var result= await authService.RefreshTokenAsync(request);
-            if(result is null || result.AccessToken is null || result.RefreshToken is null)
+            var result = await authService.RefreshTokenAsync(request);
+            if (result is null)
+            {
+
+                return Unauthorized("Invalid refresh token");
+
+            }
+
+            return Ok("new access token:"+result);
+
+        }
+
+        [HttpPost("refresh-bothtokens")]
+
+        public async Task<ActionResult<TokenResponseDTO>> RefreshBothTokens(RefreshTokenRequestDTO request)
+        {
+
+            var result = await authService.RefreshBothTokensAsync(request);
+            if (result is null || result.AccessToken is null || result.RefreshToken is null)
             {
 
                 return Unauthorized("Invalid refresh token");
@@ -86,6 +103,8 @@ namespace AuthUserAPI.Controllers
 
             return Ok(result);
 
+
         }
     }
+
 }

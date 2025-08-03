@@ -8,5 +8,7 @@ namespace AuthUserAPI.Data
 
         public DbSet<User> Users {  get; set; }
 
+
+
     }
 }

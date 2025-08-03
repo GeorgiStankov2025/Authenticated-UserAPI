@@ -9,7 +9,9 @@ namespace AuthUserAPI.Services
 
         Task<TokenResponseDTO> LoginAsync(UserDTO request);
 
-        Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenRequestDTO request);
+        Task<string> RefreshTokenAsync(RefreshTokenRequestDTO request);
+
+        Task<TokenResponseDTO> RefreshBothTokensAsync(RefreshTokenRequestDTO request);
 
     }
 }

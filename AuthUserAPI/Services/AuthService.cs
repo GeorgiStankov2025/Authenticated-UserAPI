@@ -1,6 +1,7 @@
 ﻿using AuthUserAPI.Data;
 using AuthUserAPI.Entities;
 using AuthUserAPI.Models;
+using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
@@ -42,8 +43,15 @@ namespace AuthUserAPI.Services
 
         private async Task<TokenResponseDTO> CreatetokenResponse(User user)
         {
+
+
+            
+
             return new TokenResponseDTO { AccessToken = CreateToken(user), RefreshToken = await GenerateAndSaveRefreshtokenAsync(user) };
         }
+
+       
+
 
         public async Task<User?> RegisterAsync(UserDTO request)
         {
@@ -70,6 +78,8 @@ namespace AuthUserAPI.Services
 
         private string CreateToken(User user)
         {
+
+            
 
             var claims = new List<Claim>
             {
@@ -111,6 +121,8 @@ namespace AuthUserAPI.Services
 
         }
 
+
+
         private async Task<string> GenerateAndSaveRefreshtokenAsync(User user)
         {
 
@@ -131,7 +143,7 @@ namespace AuthUserAPI.Services
 
             var user = await context.Users.FindAsync(userId);
 
-            if(user is null || user.RefreshToken != refreshToken||user.RefreshTokenExpiryTime<=DateTime.UtcNow)
+            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
 
                 return null;
@@ -139,23 +151,42 @@ namespace AuthUserAPI.Services
             }
 
             return user;
+            
+        }
+
+        public async Task<string> RefreshTokenAsync(RefreshTokenRequestDTO request)
+        {
+            var user = await ValidateRefreshtokenAsync(request.UserId, request.RefreshToken);
+
+            if (user is null)
+            {
+                return null;
+
+            }
+
+            CreateToken(user);
+
+            return CreateToken(user);
+
+
 
         }
 
-        public async Task<TokenResponseDTO> RefreshTokenAsync(RefreshTokenRequestDTO request)
+        public async Task<TokenResponseDTO> RefreshBothTokensAsync(RefreshTokenRequestDTO request)
         {
             var user = await ValidateRefreshtokenAsync(request.UserId, request.RefreshToken);
-                
-            if(user is null)
+
+            if (user is null)
             {
                 return null;
 
             }
 
             return await CreatetokenResponse(user);
-            
-            
+
+
 
         }
+
     }
 }

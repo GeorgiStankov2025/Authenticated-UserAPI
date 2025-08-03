@@ -80,6 +80,9 @@ namespace AuthUserAPI
                     ValidAudience = audience,
 
                     ValidateLifetime = true,
+
+                    ClockSkew = TimeSpan.Zero
+
                 };
 
             });
