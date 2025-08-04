@@ -13,5 +13,7 @@ namespace AuthUserAPI.Services
 
         Task<TokenResponseDTO> RefreshBothTokensAsync(RefreshTokenRequestDTO request);
 
+        Task<User?> ChangePasswordAsync(UserDTO request, string username,string newPassword, string confirmPassword);
+
     }
 }

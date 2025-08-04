@@ -18,8 +18,6 @@ namespace AuthUserAPI.Controllers
     public class AuthController(IAuthService authService) : ControllerBase
     {
 
-
-
         [HttpPost("register")]
 
         public async Task<ActionResult<User>> Register(UserDTO request)
@@ -48,7 +46,6 @@ namespace AuthUserAPI.Controllers
                 return BadRequest("Invalid username or password.");
 
             }
-
 
             return Ok(result);
 
@@ -105,6 +102,25 @@ namespace AuthUserAPI.Controllers
 
 
         }
+
+        [HttpPost("change-userPassword")]
+
+        public async Task<ActionResult<User?>> ChangePasswordAsync(UserDTO request,string username, string newPassword, string confirmPassword)
+        {
+
+            var result = await authService.ChangePasswordAsync(request,username,newPassword,confirmPassword);
+
+            if (request is null || newPassword is null || newPassword == string.Empty || newPassword.Length < 5 || confirmPassword is null)
+            {
+
+                return BadRequest();
+
+            }
+
+            return Ok(result);
+
+        }
+
     }
 
 }

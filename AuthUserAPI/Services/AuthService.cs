@@ -36,25 +36,19 @@ namespace AuthUserAPI.Services
 
             }
 
-            
-
             return await CreatetokenResponse(user);
         }
 
         private async Task<TokenResponseDTO> CreatetokenResponse(User user)
         {
 
-
-            
-
             return new TokenResponseDTO { AccessToken = CreateToken(user), RefreshToken = await GenerateAndSaveRefreshtokenAsync(user) };
+        
         }
-
-       
-
 
         public async Task<User?> RegisterAsync(UserDTO request)
         {
+           
             if(await context.Users.AnyAsync(u=>u.Username==request.Username))
             {
 
@@ -78,8 +72,6 @@ namespace AuthUserAPI.Services
 
         private string CreateToken(User user)
         {
-
-            
 
             var claims = new List<Claim>
             {
@@ -168,8 +160,6 @@ namespace AuthUserAPI.Services
 
             return CreateToken(user);
 
-
-
         }
 
         public async Task<TokenResponseDTO> RefreshBothTokensAsync(RefreshTokenRequestDTO request)
@@ -184,9 +174,43 @@ namespace AuthUserAPI.Services
 
             return await CreatetokenResponse(user);
 
-
-
         }
 
+        public async Task<User?> ChangePasswordAsync(UserDTO request, string username, string newPassword, string confirmPassword)
+        {
+
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+
+            if (user is null&& username!=request.Username)
+            {
+
+                return null;
+
+            }
+            if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password)
+                == PasswordVerificationResult.Failed)
+            {
+
+                return null;
+
+            }
+
+            if (newPassword==confirmPassword &&!string.IsNullOrEmpty(confirmPassword)&&newPassword!=request.Password)
+            {
+
+                request.Password = newPassword;
+               
+                var hashedNewPassword = new PasswordHasher<User>().HashPassword(user,request.Password);
+               
+                user.PasswordHash=hashedNewPassword;
+
+                await context.SaveChangesAsync();      
+
+            }
+
+            return user;
+
+        }
+        
     }
 }
